@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d12"><meta name="robots" content="noindex,nofollow">
+<title>BOKUN デイリー</title>
+<style>
+:root{--bg:#0b0d12;--card:#171b25;--line:#2b3346;--gold:#d9b441;--gold-soft:#f0d97e;--ink:#f6f3ea;--ink-faint:#8b93a4;--warn:#e29a6c}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:radial-gradient(900px 500px at 50% -10%,rgba(217,180,65,.12),transparent 60%),var(--bg);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.box{width:100%;max-width:360px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:32px 26px;text-align:center}
+.mark{color:var(--gold);letter-spacing:.18em;font-size:.7rem;font-weight:700;margin-bottom:6px}
+h1{font-size:1.2rem;font-weight:700;margin-bottom:4px}
+.sub{font-size:.75rem;color:var(--ink-faint);margin-bottom:22px}
+input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:#11141c;color:var(--ink);font-size:1rem;text-align:center;letter-spacing:.1em;outline:none}
+input:focus{border-color:var(--gold)}
+button{width:100%;margin-top:12px;padding:13px;border:none;border-radius:12px;background:linear-gradient(180deg,var(--gold-soft),var(--gold));color:#1a160a;font-weight:700;font-size:.95rem;cursor:pointer}
+.err{color:var(--warn);font-size:.75rem;margin-top:12px;min-height:1em}
+.note{font-size:.68rem;color:var(--ink-faint);margin-top:18px;line-height:1.6}
+</style></head><body>
+<div class="box">
+<div class="mark">TRAVELING TOKYO / KYOTO</div>
+<h1>BOKUN デイリー</h1>
+<div class="sub">合言葉を入力してください</div>
+<input id="pw" type="password" placeholder="パスワード" autocomplete="current-password">
+<button id="go">開く</button>
+<div class="err" id="err"></div>
+<div class="note">このページの中身はAES-256で暗号化されています。<br>初回入力後はこの端末に記憶されます。</div>
+</div>
+<script id="ct" type="application/octet-stream">__CIPHERTEXT__</script>
+<script>
+const ITER=600000;
+function b64b(s){const bin=atob(s.trim());const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u}
+async function decrypt(pass){
+  const raw=b64b(document.getElementById('ct').textContent);
+  if(String.fromCharCode(...raw.slice(0,8))!=='Salted__')throw new Error('format');
+  const salt=raw.slice(8,16), data=raw.slice(16);
+  const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveBits']);
+  const bits=new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations:ITER,hash:'SHA-256'},km,48*8));
+  const key=await crypto.subtle.importKey('raw',bits.slice(0,32),'AES-CBC',false,['decrypt']);
+  const pt=await crypto.subtle.decrypt({name:'AES-CBC',iv:bits.slice(32,48)},key,data);
+  return new TextDecoder().decode(pt);
+}
+async function tryOpen(pass,silent){
+  try{
+    const html=await decrypt(pass);
+    localStorage.setItem('bokun_pw',pass);
+    document.open();document.write(html);document.close();
+  }catch(e){
+    if(!silent){document.getElementById('err').textContent='合言葉が違います';}
+    localStorage.removeItem('bokun_pw');
+  }
+}
+document.getElementById('go').onclick=()=>tryOpen(document.getElementById('pw').value,false);
+document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')tryOpen(e.target.value,false)});
+const saved=localStorage.getItem('bokun_pw');
+if(saved)tryOpen(saved,true);
+</script></body></html>
