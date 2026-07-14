@@ -164,7 +164,7 @@ function renderCombined(){
     <div style="font-size:.66rem;color:var(--ink-faint)">前売り ${yen(x.bokun)}(${x.bn}件) ・ <span style="color:#6cc796">現地 ${yen(x.square)}(${x.sn}件)</span></div>
    </div>`).join('')}
   </div>
-  <div class="note">前売り=Bokun純売上(OTA手数料控除後・催行日ベース)。現地=Square店頭会計(COMPLETED)。二重計上なし(別々の決済)。金=前売り、緑=現地。</div>`;
+  <div class="note">前売り=Bokun純売上(OTA手数料控除後・催行日ベース)。現地=Square純売上(税抜・返金控除後=Squareダッシュボードと同一定義)。二重計上なし(別々の決済)。金=前売り、緑=現地。</div>`;
  }else{
   body=`<div class="card"><div class="note">合算データなし(Square未取得の日は前売りのみ表示されます)</div></div>`;
  }
@@ -188,7 +188,7 @@ function renderSquare(){
   <div class="card"><h3>店舗別 現地売上(昨日)</h3>
   ${locs.map(l=>`<div class="row"><span class="nm">${l.name}</span><span class="bar"><i style="width:${((l.gross||0)/mx*100).toFixed(1)}%"></i></span><span class="val">${yen(l.gross||0)}</span><span class="cnt">${l.orders}件</span></div>`).join('')}
   </div>
-  <div class="note">Square POS(COMPLETED注文)。BokunのOTA前売りとは別の、店頭アップセル・当日会計の実額。</div>`;
+  <div class="note">Square POS(COMPLETED注文)の純売上=税抜・返金控除後(Squareダッシュボードの「純売上」と一致)。BokunのOTA前売りとは別枠。</div>`;
  }else{
   body=`<div class="card"><h3>本日はSquareデータ未取得</h3><div class="note">Square連携が朝の実行時に利用できなかったか、取得に失敗しました。Bokun側の数字には影響ありません。翌朝の実行で自動的に再試行されます。</div></div>`;
  }
