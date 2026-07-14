@@ -140,7 +140,8 @@ function render(){
  renderCombined(); renderSquare(); renderAudit();
 }
 function renderCombined(){
- const C=DATA.combined;
+ const C=Array.isArray(DATA.combined)?DATA.combined:(DATA.combined||{})[REGION]||[];
+ const rb={'all':'全社','tokyo':'東京','kyoto':'京都'}[REGION];
  let body;
  if(C&&C.length){
   const tb=C.reduce((s,x)=>s+x.bokun,0), ts=C.reduce((s,x)=>s+x.square,0), tt=tb+ts;
@@ -168,13 +169,15 @@ function renderCombined(){
   body=`<div class="card"><div class="note">合算データなし(Square未取得の日は前売りのみ表示されます)</div></div>`;
  }
  document.getElementById('p-combined').innerHTML=`
-  <div class="page-h">合算</div><div class="page-sub">前売り+現地=本当の昨日の売上</div>${body}`;
+  <div class="page-h">合算</div><div class="page-sub">前売り+現地=本当の昨日の売上</div><span class="badge">${rb}</span>${body}`;
 }
 function renderSquare(){
  const sq=DATA.square;
+ const rb={'all':'全社','tokyo':'東京','kyoto':'京都'}[REGION];
  let body;
- if(sq&&sq.locations&&sq.locations.length){
-  const locs=[...sq.locations].sort((a,b)=>(b.gross||0)-(a.gross||0));
+ const flt=sq&&sq.locations?sq.locations.filter(l=>REGION==='all'||l.region===REGION):[];
+ if(flt.length){
+  const locs=[...flt].sort((a,b)=>(b.gross||0)-(a.gross||0));
   const tg=locs.reduce((s,l)=>s+(l.gross||0),0), to=locs.reduce((s,l)=>s+l.orders,0);
   const mx=Math.max(...locs.map(l=>l.gross||0),1);
   body=`
@@ -190,7 +193,7 @@ function renderSquare(){
   body=`<div class="card"><h3>本日はSquareデータ未取得</h3><div class="note">Square連携が朝の実行時に利用できなかったか、取得に失敗しました。Bokun側の数字には影響ありません。翌朝の実行で自動的に再試行されます。</div></div>`;
  }
  document.getElementById('p-square').innerHTML=`
-  <div class="page-h">Square 現地売上</div><div class="page-sub">店舗レジ実績(前売りとは別枠)</div>${body}`;
+  <div class="page-h">Square 現地売上</div><div class="page-sub">店舗レジ実績(前売りとは別枠)</div><span class="badge">${rb}</span>${body}`;
 }
 function renderAudit(){
  const m=DATA.meta||{};
