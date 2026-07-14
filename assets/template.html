@@ -216,7 +216,8 @@ function renderAudit(){
   ・純売上 = OTA手数料控除後の自社受取額(Bokun請求書 totalSansCommission を請求書通貨で円換算)。<br>
   ・催行日(Travelled)基準・キャンセル除外。BOKUN管理画面の Experience Sales Report と同条件。<br>
   ・東京=Traveling Tokyoアカウント、京都=Traveling Kyotoアカウント(祇園ZEN含む)をSUPPLIERロールで統合、予約ID重複排除。<br>
-  ・Squareは店頭レジ(COMPLETED)の実額で、Bokun前売りとは別枠。</div></div>`;
+  ・Squareは店頭レジ(COMPLETED)の実額で、Bokun前売りとは別枠。<br>
+  <b style="color:#e29a6c">⚠ Klookの純売上は現在検証中。BokunのKlook接続設定(手数料0%・定価計上)に過大計上の疑いがあり、Klookマーチャント精算額との突合を実施中。確定まではKlook行および合算のKlook寄与分は暫定値として扱うこと。</b></div></div>`;
 }
 document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
  document.querySelectorAll('.seg button').forEach(x=>x.classList.remove('active'));
