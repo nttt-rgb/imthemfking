@@ -94,13 +94,23 @@ const yenS=v=>v>=1e8?YS+(v/1e8).toFixed(2)+'億':v>=1e4?YS+Math.round(v/1e4).toL
 document.getElementById('upd').textContent=DATA.updated;
 function rows(list,valKey){const mx=Math.max(...list.map(x=>x[valKey]),1);
  return list.map(x=>`<div class="row"><span class="nm">${x.name}</span><span class="bar"><i style="width:${(x[valKey]/mx*100).toFixed(1)}%"></i></span><span class="val">${yen(x[valKey])}</span><span class="cnt">${x.n}件</span></div>`).join('')}
-function spark(d30,key){const w=500,h=120,pad=4;const vals=d30.map(x=>x[key]);const mx=Math.max(...vals,1);
+const SP={};
+function spark(d30,key,sid){const w=500,h=120,pad=4;const vals=d30.map(x=>x[key]);const mx=Math.max(...vals,1);
  const bw=(w-pad*2)/d30.length;
+ SP[sid]={data:d30,key:key};
  const bars=d30.map((x,i)=>{const bh=Math.max(2,(x[key]/mx)*(h-30));
   const isY=i===d30.length-1;
-  return `<rect x="${(pad+i*bw).toFixed(1)}" y="${(h-20-bh).toFixed(1)}" width="${(bw*0.66).toFixed(1)}" height="${bh.toFixed(1)}" rx="2" fill="${isY?'#f0d97e':'#9a8138'}" opacity="${isY?1:0.75}"/>`}).join('');
+  return `<rect class="b" x="${(pad+i*bw).toFixed(1)}" y="${(h-20-bh).toFixed(1)}" width="${(bw*0.66).toFixed(1)}" height="${bh.toFixed(1)}" rx="2" fill="${isY?'#f0d97e':'#9a8138'}" opacity="${isY?1:0.75}"/>`}).join('');
+ const hits=d30.map((x,i)=>`<rect x="${(pad+i*bw).toFixed(1)}" y="0" width="${bw.toFixed(1)}" height="${h-18}" fill="transparent" style="cursor:pointer" onclick="pick('${sid}',${i})"/>`).join('');
  const lbl=[0,9,19,29].filter(i=>i<d30.length).map(i=>`<text x="${(pad+i*bw).toFixed(1)}" y="${h-6}" font-size="9" fill="#8b93a4">${d30[i].d.slice(5)}</text>`).join('');
- return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto">${bars}${lbl}</svg>`}
+ return `<div id="info-${sid}" style="font-size:.86rem;margin:2px 0 6px;font-variant-numeric:tabular-nums;color:var(--ink)"></div>
+ <svg id="svg-${sid}" viewBox="0 0 ${w} ${h}" style="width:100%;height:auto">${bars}${lbl}${hits}</svg>
+ <div class="note" style="margin-top:2px">▲ 棒をタップするとその日の数字が出ます</div>`}
+function pick(sid,i){const s=SP[sid];if(!s)return;const x=s.data[i];
+ const el=document.getElementById('info-'+sid);
+ if(el)el.innerHTML=`<b style="color:#f0d97e">${x.d.slice(5).replace('-','/')}</b> — 純売上 ${yen(x.net)} ・ ${x.n}件`;
+ const svg=document.getElementById('svg-'+sid);
+ if(svg){const bs=svg.querySelectorAll('rect.b');bs.forEach((r,j)=>r.setAttribute('opacity',j===i?'1':'0.4'));}}
 function pct(a,b){if(!b)return'—';const p=(a/b-1)*100;return `<span class="${p>=0?'up':'dn'}">${p>=0?'+':''}${p.toFixed(1)}%</span>`}
 function render(){
  const R=DATA.regions[REGION];const y=R.y;
@@ -121,9 +131,9 @@ function render(){
  document.getElementById('p-trend').innerHTML=`
   <div class="page-h">推移</div><div class="page-sub">直近30日・催行日ベース(確定)</div>
   <span class="badge">${rb}</span>
-  <div class="card"><h3>日次 純売上(30日)</h3>${spark(R.d30,'net')}
+  <div class="card"><h3>日次 純売上(30日)</h3>${spark(R.d30,'net','tnet')}
    <div class="note">金=昨日。30日計 ${yenS(R.d30.reduce((s,x)=>s+x.net,0))} / ${R.d30.reduce((s,x)=>s+x.n,0).toLocaleString()}件</div></div>
-  <div class="card"><h3>日次 予約件数(30日)</h3>${spark(R.d30,'n')}</div>
+  <div class="card"><h3>日次 予約件数(30日)</h3>${spark(R.d30,'n','tn')}</div>
   <div class="card"><h3>当月 vs 前月</h3>
    <div class="row"><span class="nm">${R.tmLabel} 累計</span><span class="bar"><i style="width:${R.lastMonth.net?Math.min(100,R.mtd.net/R.lastMonth.net*100).toFixed(1):100}%"></i></span><span class="val">${yenS(R.mtd.net)}</span><span class="cnt">${R.mtd.n}件</span></div>
    <div class="row"><span class="nm">${R.lmLabel} 同期間</span><span class="bar"><i style="width:${R.lastMonth.net?Math.min(100,R.lmtd.net/R.lastMonth.net*100).toFixed(1):0}%;opacity:.55"></i></span><span class="val">${yenS(R.lmtd.net)}</span><span class="cnt">${R.lmtd.n}件</span></div>
@@ -138,6 +148,7 @@ function render(){
   <span class="badge">${rb}</span>
   <div class="card"><h3>商品別 純売上(30日)</h3>${rows(R.products_30,'net')}</div>`;
  renderCombined(); renderSquare(); renderAudit();
+ pick('tnet',R.d30.length-1); pick('tn',R.d30.length-1);
 }
 function renderCombined(){
  const C=Array.isArray(DATA.combined)?DATA.combined:(DATA.combined||{})[REGION]||[];
