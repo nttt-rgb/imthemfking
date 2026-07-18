@@ -219,7 +219,7 @@ function renderAudit(){
   [m.fxOk,'為替(Bokun公式)',m.fxOk?`1USD=¥${m.usdJpy} / 1EUR=¥${m.eurJpy}`:'取得失敗'],
   [m.squareOk,'Square現地売上',m.squareOk?'取得OK':'本日は未取得(ベストエフォート)'],
   [m.selfCheck?!m.selfCheck.failed.length:false,'数値自己検証',m.selfCheck?`${m.selfCheck.passed}/${m.selfCheck.total} 項目OK${m.selfCheck.failed.length?' / NG: '+m.selfCheck.failed.join('、'):''}`:'未実施'],
-  [true,'次回自動更新',m.schedule||'毎朝 8:00 JST'],
+  [true,'次回自動更新',m.schedule||'毎朝 6:00 JST'],
  ];
  document.getElementById('p-audit').innerHTML=`
   <div class="page-h">審査</div><div class="page-sub">このレポート自体の健全性チェック</div>
