@@ -160,7 +160,7 @@ function renderCombined(){
   body=`
   <div class="kpis" style="margin-top:8px">
    <div class="kpi" style="grid-column:1/-1"><div class="t">昨日の総売上(前売り+現地)</div><div class="v" style="font-size:1.5rem">${yenS(tt)}</div><div class="s">Bokun前売り ${yenS(tb)} + Square現地 ${yenS(ts)}</div></div>
-   ${(REGION==='all'&&DATA.combinedMtd)?`<div class="kpi" style="grid-column:1/-1"><div class="t">${DATA.combinedMtd.month} 月累計 総売上(全社・前売り+現地)${DATA.combinedMtd.provisional?' <span style="color:var(--warn)">暫定</span>':''}</div><div class="v" style="font-size:1.5rem">${yenS(DATA.combinedMtd.total)}</div><div class="s">Bokun前売り ${yenS(DATA.combinedMtd.bokunNet)} + Square現地 ${yenS(DATA.combinedMtd.squareNet)}${DATA.combinedMtd.provisional?` ・現地${DATA.combinedMtd.missingDays.length}日未取得`:''}</div></div>`:''}
+   ${(REGION==='all'&&DATA.combinedMtd)?`<div class="kpi" style="grid-column:1/-1"><div class="t">${DATA.combinedMtd.month} 月累計 総売上(全社・前売り+現地)${DATA.combinedMtd.provisional?' <span style="color:var(--warn)">暫定</span>':''}</div><div class="v" style="font-size:1.5rem">${yenS(DATA.combinedMtd.total)}</div><div class="s">Bokun前売り ${yenS(DATA.combinedMtd.bokunNet)} + Square現地 ${yenS(DATA.combinedMtd.squareNet)}${DATA.combinedMtd.provisional?` ・暫定(現地${DATA.combinedMtd.missingDays.length}日/前売り${(DATA.combinedMtd.bokunMissingDays||[]).length}日欠測)`:''}</div><div class="s" style="font-size:.62rem;color:var(--ink-faint)">${DATA.combinedMtd.basis||'前売り=催行日基準 / 現地=決済完了日基準'}</div></div>`:''}
   </div>
   <div class="card"><h3>アクティビティ別 総売上(昨日)</h3>
   ${C.map(x=>`
